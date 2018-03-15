@@ -1,12 +1,12 @@
 /*
 	This Script determines the space reservered, used, and available for
 	one or more tables and related indexes.
-	The sggrgated data is correct even if there are multiple filegroup split across multiple files
+	The aggrgated data is correct even if there are multiple filegroups split across multiple files
 
 	Wild cards are supported
 
 	$Archive: /SQL/QueryWork/tbl_SpaceUsedReservedForTableName.sql $
-	$Revision: 13 $	$Date: 17-02-10 10:04 $
+	$Revision: 14 $	$Date: 9/12/17 11:35a $
 
 */
 
@@ -27,14 +27,14 @@ Select
 	[Database] = Db_Name()
 	, [Schema] = Schema_Name(so.schema_id)
 	, [Table] = so.Name
-	, [Num Files] = Count(*)
-	, [rows] = Max(sp.rows)
-	, [Reserved Pages] = Max(ps.reserved_page_count)
+	, [Rows] = Max(sp.rows)
+	--, [Reserved Pages] = Max(ps.reserved_page_count)
 	, [Reserved MB] = Sum(ps.reserved_page_count / 128)
-	, [Free MB] =  Sum((ps.reserved_page_count - ps.used_page_count) / 128)
 	, [Used MB] = Sum(ps.used_page_count / 128)
+	, [Free MB] =  Sum((ps.reserved_page_count - ps.used_page_count) / 128)
 	, [OverFlow MB] = Sum(ps.row_overflow_used_page_count / 128)
 	, [Reserved LOB MB] = Sum(ps.lob_reserved_page_count / 128)
+	, [Num Files] = Count(*)
 	--, ps.*
 	--, sp.*
 From

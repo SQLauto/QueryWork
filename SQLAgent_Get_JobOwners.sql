@@ -1,3 +1,11 @@
+
+/*
+$Archive: /SQL/QueryWork/SQLAgent_Get_JobOwners.sql $
+$Revision: 2 $	$Date: 17-11-18 10:00 $
+*/
+Use MSDB;
+Go
+
 Select
 	sj.name
 	,SUSER_SNAME( sj.owner_sid)

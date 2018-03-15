@@ -6,16 +6,16 @@
 	The article discusses getting the data for an index "Pre-Fetched" prior to 
 	Rebuilding or Reorganizing to reduce the duration of the Schema Modification Lock.
 
-	$Archive: /SQL/QueryWork/Index_GetNumberCachedPages.sql $
-	$Date: 15-03-11 20:20 $	$Revision: 1 $
+	$Archive: /SQL/QueryWork/Idx_GetNumberCachedPages.sql $
+	$Date: 17-11-18 10:00 $	$Revision: 2 $
 */
 
 Declare
 	@IndexName NVarchar(128)
 	, @TableName	NVarchar(128)
 	;
-Set @TableName = N'dbo.TSCI_All';
-Set @IndexName = N'Ix_ReadingDateIncludeIntervalNum';
+Set @TableName = N'';
+Set @IndexName = N'';
 select
 	i.name
   , au.type_desc

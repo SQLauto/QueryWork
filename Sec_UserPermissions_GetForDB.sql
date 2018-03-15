@@ -1,4 +1,4 @@
--- $Workfile: User_ScriptDB_Permissions.sql $
+-- $Workfile: Sec_UserPermissions_GetForDB.sql $
 /*
 	Description:
 	   Scripts database permissions (including objects) for a specific user or all database users
@@ -10,23 +10,22 @@
 	Using sys.objects When Scripting Permissions? You're Missing Something!
 	http://www.kendalvandyke.com/2014/02/using-sysobjects-when-scripting.html
 
-	$Archive: /SQL/QueryWork/User_ScriptDB_Permissions.sql $
-	$Date: 14-02-16 16:22 $	$Revision: 1 $
+	$Archive: /SQL/QueryWork/Sec_UserPermissions_GetForDB.sql $
+	$Date: 17-11-29 12:17 $	$Revision: 2 $
 
 */
 
 
 SET NOCOUNT ON
 
-DECLARE    @user SYSNAME;
-
--- Set this to NULL for all users
--- SET @user = 'DOMAIN\USER';
-SET @user = NULL;
---Set @User = 'SIMMONS\dg_SQLAdmin'
+DECLARE	
+	@user SYSNAME
+		 = Null	--  NULL for all users
+		-- = N'Wayne\Carly.Wang'
+		-- = 'Wayne\SG-Dal-SQLAdmin'
+	;
 
 SELECT 'USE ' + QUOTENAME(DB_NAME()) + ';' AS '--Database Context';
-
 
 -- Logins
 SELECT 'CREATE USER [' + usr.name + '] FOR LOGIN [' + susr.name + ']'
@@ -52,7 +51,6 @@ WHERE  /*usr2.is_fixed_role = 0*/
        usr2.sid != 0x01
        AND usr2.NAME = COALESCE(@user, usr2.NAME)
 ORDER BY rm.role_principal_id ASC;
-
 
 -- Object permissions
 WITH cteObject ( [major_id], [name], [class_desc], [class_name] )

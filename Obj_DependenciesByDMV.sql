@@ -14,7 +14,7 @@ If Object_Id('tempdb..#theData', 'U') Is Not Null Drop Table tempdb..#theData;
 Go
 	
 Declare
-	@RefObjName		NVarchar(128) = N''
+	@RefObjName		NVarchar(128) = N'fn_TSCIALLwithTempLoss'
 	, @RefObjSchema	NVarchar(128) = N'dbo'
 	;
 

@@ -1,14 +1,16 @@
+
+
+/*
+	Enumerate Windows Group Members
+	http://www.sqlservercentral.com/articles/Active+Directory/138308
+
 --###############################################################################################
 -- Quick script to enumerate Active directory users who get permissions from An Active Directory Group
 --###############################################################################################
 
 
-/*
-	Enumerate Windows Group Members
-	http://www.sqlservercentral.com/articles/Active+Directory/138308/
-
-	$Archvie: $
-	$Revision: 1 $	$Date: 16-05-12 14:11 $
+	$Archive: /SQL/QueryWork/Sec_WindowsGroup_Enumerate.sql $
+	$Revision: 2 $	$Date: 17-11-29 12:17 $
 
 */
 If Object_Id('tempdb.dbo.#tmp') Is Not Null

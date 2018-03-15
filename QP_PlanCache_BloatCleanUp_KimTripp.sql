@@ -32,18 +32,33 @@ SELECT
     , [USE Count 1 Num Plans] = sum(CASE WHEN cp.usecounts = 1 THEN 1 ELSE 0 END)
 FROM sys.dm_exec_cached_plans as cp
 GROUP BY cp.objtype
-ORDER BY  [USE Count 1 (MBs)] DESC
+ORDER BY [USE Count 1 (MBs)] DESC
 Return;
 
 
 /*
 	Plan cache, adhoc workloads and clearing the single-use plan cache bloat
 	http://www.sqlskills.com/blogs/kimberly/plan-cache-adhoc-workloads-and-clearing-the-single-use-plan-cache-bloat/
-Cleared SQL2008R2 on 20140501 <RBH>
+Dev-SQL-04 20180228 <RBH>
+Before
 CacheType	Total Plans	Total MBs	Avg Use Count	USE Count 1 (MBs)	USE Count 1 Num Plans
-Adhoc		49785		872.036262	124				291.845886			43425
-Prepared	2856		265.132812	8242			114.820312			1549
+Adhoc		34860	1445.064720	1	29				361.106277			27998
+Proc		3271	7922.593750		26895			215.851562			122
+Prepared	416		279.945312		43544			122.976562			107
+Check		571		16.125000		47030			1.906250			66
+Trigger		29		17.171875		255789			0.601562			2
+UsrTab		19		0.664062		754				0.023437			1
+View		693		80.390625		20537			0.000000			0
 
+-- After Cleared single Adhoc plans,
+CacheType	Total Plans	Total MBs	Avg Use Count	USE Count 1 (MBs)	USE Count 1 Num Plans
+Proc		3282	7984.734375		26815			208.351562			116
+Check		571		16.125000		47057			1.906250			66
+Trigger		29		17.171875		255891			0.601562			2
+Adhoc		21		0.754920		210				0.098670			17
+UsrTab		19		0.664062		763				0.023437			1
+Prepared	5		0.757812		952				0.015625			1
+View		693		80.390625		20551			0.000000			0
 */
 
 -- Clearing *JUST* the 'SQL Plans' based on *just* the amount of Adhoc/Prepared single-use plans (2005/2008): 
@@ -106,11 +121,11 @@ Return;
 USE zDBAInfo
 go
 
-if OBJECTPROPERTY(OBJECT_ID('sp_SQLskills_CheckPlanCache'), 'IsProcedure') = 1
-	DROP PROCEDURE sp_SQLskills_CheckPlanCache
+if OBJECTPROPERTY(OBJECT_ID('zDBA.SQLskills_CheckPlanCache'), 'IsProcedure') = 1
+	DROP PROCEDURE zDBA.SQLskills_CheckPlanCache
 go
 
-CREATE PROCEDURE sp_SQLskills_CheckPlanCache
+CREATE PROCEDURE zDBA.SQLskills_CheckPlanCache
 	(@Percent	decimal(6,3) OUTPUT,
 	 @WastedMB	decimal(19,3) OUTPUT)
 As
@@ -160,7 +175,7 @@ Begin	-- Procedure
 End;	-- Procedure
 GO
 Return;
-EXEC sys.sp_MS_marksystemobject 'sp_SQLskills_CheckPlanCache'
+--EXEC sys.sp_MS_marksystemobject 'sp_SQLskills_CheckPlanCache'
 go
 Return;
 -----------------------------------------------------------------
@@ -171,7 +186,7 @@ DECLARE @Percent		decimal(6, 3)
 		, @WastedMB		decimal(19,3)
 		, @StrMB		nvarchar(20)
 		, @StrPercent	nvarchar(20)
-EXEC sp_SQLskills_CheckPlanCache @Percent output, @WastedMB output
+EXEC zDBA.SQLskills_CheckPlanCache @Percent output, @WastedMB output
 
 SELECT @StrMB = CONVERT(nvarchar(20), @WastedMB)
 		, @StrPercent = CONVERT(nvarchar(20), @Percent)
@@ -179,11 +194,11 @@ SELECT @StrMB = CONVERT(nvarchar(20), @WastedMB)
 IF @Percent > 10 OR @WastedMB > 10
 	BEGIN
 		DBCC FREESYSTEMCACHE('SQL Plans') 
-		RAISERROR ('%s MB (%s percent) was allocated to single-use plan cache. Single-use plans have been cleared.', 10, 1, @StrMB, @StrPercent)
+		RAISERROR ('%s MB (%s percent) was allocated to single-use plan cache. Single-use plans have been cleared.', 0, 0, @StrMB, @StrPercent)
 	END
 ELSE
 	BEGIN
-		RAISERROR ('Only %s MB (%s percent) is allocated to single-use plan cache - no need to clear cache now.', 10, 1, @StrMB, @StrPercent)
+		RAISERROR ('Only %s MB (%s percent) is allocated to single-use plan cache - no need to clear cache now.', 0, 0, @StrMB, @StrPercent)
 			-- Note: this is only a warning message and not an actual error.
 	END
 go

@@ -5,7 +5,8 @@
 	$Archive: /SQL/QueryWork/Qry_CXPacket.sql $
 	$Date: 15-04-30 15:23 $	$Revision: 2 $
 */
-
+Declare @SPID	int = 102
+	;
 Select
 	[Req SPID] = er.Session_id
 	, [Req Id] = er.request_id
@@ -34,8 +35,9 @@ From
 	inner join sys.dm_exec_query_memory_grants as qm
 		on qm.session_id = er.session_id
 		and qm.request_id = er.request_id
-Where
-	er.wait_type = 'CXPACKET'
+Where 1 = 1
+	And er.wait_type = 'CXPACKET'
+	And es.session_id = @SPID
 Order By
 	er.Session_id
 	, er.request_id

@@ -4,7 +4,7 @@
 
 	$Workfile: Obj_Get_WithStrInDefinition.sql $
 	$Archive: /SQL/QueryWork/Obj_Get_WithStrInDefinition.sql $
-	$Revision: 16 $	$Date: 16-12-06 8:59 $
+	$Revision: 17 $	$Date: 9/12/17 11:35a $
 
 */
 If Object_Id('tempdb..#theRefs', 'U') Is Not Null
@@ -65,13 +65,14 @@ From sys.objects as so
 		ON so.object_id = sm.object_id
 Where 1 = 1
 	and (sm.definition like '%' + @strSearch1 + '%' Escape @chrEscape
-		or Len(@strSearch2) > 0 and sm.definition like '%' + @strSearch2 + '%' Escape @chrEscape
+		And (Len(@strSearch2) = 0		-- if @strSearch2 specified then both must be present.
+			Or sm.definition like '%' + @strSearch2 + '%' Escape @chrEscape)
 		)
 	And so.name not like 'zDrop_%'
 	And so.name != @strSearch1		-- Exclude the actual definition of the object
 	And so.schema_id != Coalesce(Schema_Id('zDrop'), -1)
 	--and sm.definition not like '%' + @strExclude + '%' Escape @chrEscape
-	--and so.type in ( 'FN', 'IF', 'P', 'TF', 'TR', 'V')	-- Executables Scalar Function, Inline Function, procedure, Table Function, Trigger
+	and so.type in ( 'FN', 'IF', 'P', 'TF', 'TR', 'V')	-- Executables Scalar Function, Inline Function, procedure, Table Function, Trigger
 	--and so.type = 'P'
 	--and so.type = 'TR'		-- Trigger
 

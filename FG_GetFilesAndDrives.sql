@@ -2,9 +2,14 @@
 	$Workfile: FG_GetFilesAndDrives.sql $
 	
 	List all File Groups in current Database with the files and drives.
+	This script generates the data for the Database File Size Baseline spreadsheet.
+	
+	https://waynefs-my.sharepoint.com/personal/ray_herring_wayne_com/Documents/ClearView_DBA/ClearViewFileSizes.xlsx?web=1
+
+	Potential use for routine baseline in zDBAInfo.
 
 	$Archive: /SQL/QueryWork/FG_GetFilesAndDrives.sql $
-	$Revision: 4 $	$Date: 17-02-10 10:04 $
+	$Revision: 6 $	$Date: 9/05/17 10:47a $
 
 */
 

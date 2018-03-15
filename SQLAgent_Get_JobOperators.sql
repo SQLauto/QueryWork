@@ -35,16 +35,16 @@ Group By
 
 Select 
 	sj.name
-	,[Op Name] = Coalesce(so_notify_email_operator_id.name, 'No Operator')
-	,[notify_email_operator_id] = Case When so_notify_email_operator_id.email_address Is Null Then -99 Else so_notify_email_operator_id.id End
-	,[notify_level_email] = Case When so_notify_level_email.email_address Is Null Then '<No Entry>' Else so_notify_level_email.email_address End--,[] = case when so_.email_address IS null then '<No Entry>' else so_.email_address end
-	,so_notify_level_email.name
-	,[notify_level_page] = Case When so_notify_level_page.email_address Is Null Then '<No Entry>' Else so_notify_level_page.email_address End
-	,so_notify_level_page.name
+	, [Op Name] = Coalesce(so_notify_email_operator_id.name, 'No Operator')
+	--, [notify_email_operator_id] = Case When so_notify_email_operator_id.email_address Is Null Then -99 Else so_notify_email_operator_id.id End
+	, [notify_level_email] = Case When so_notify_level_email.email_address Is Null Then '<No Entry>' Else so_notify_level_email.email_address End--,[] = case when so_.email_address IS null then '<No Entry>' else so_.email_address end
+	--,so_notify_level_email.name
+	, [notify_level_page] = Case When so_notify_level_page.email_address Is Null Then '<No Entry>' Else so_notify_level_page.email_address End
+	--,so_notify_level_page.name
 	--,[notify_netsend_operator_id] = case when so_notify_netsend_operator_id.email_address IS null then -99 else so_notify_netsend_operator_id.id end
 	--,so_notify_netsend_operator_id.name
-	,[notify_page_operator_id] = Case When so_notify_page_operator_id.email_address Is Null Then -99 Else so_notify_page_operator_id.id End
-	,[notify_page_operator_name] = so_notify_page_operator_id.name
+	--, [notify_page_operator_id] = Case When so_notify_page_operator_id.email_address Is Null Then -99 Else so_notify_page_operator_id.id End
+	, [notify_page_operator_name] = so_notify_page_operator_id.name
 	
 From
 	sysjobs As sj

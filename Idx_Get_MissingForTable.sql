@@ -10,7 +10,7 @@
 	
 	$Workfile: Idx_Get_MissingForTable.sql $
 	$Archive: /SQL/QueryWork/Idx_Get_MissingForTable.sql $
-	$Revision: 22 $	$Date: 17-02-10 10:04 $
+	$Revision: 23 $	$Date: 9/12/17 11:35a $
 
 */
 If Object_Id('tempdb.dbo.#theTables', 'U') Is Not Null
@@ -108,8 +108,8 @@ Select
 	, [User Cost] = cast(migs.avg_total_user_cost as Decimal(20, 0))
 --	, [DB Name] = DB_NAME(mid.database_id)
 	, [Num Rows] = ps.row_count
-	, [Res MB] = cast(ps.reserved_page_count / 128.0 as decimal(18,1))
-	, [Used MB] = cast(ps.used_page_count / 128.0 as decimal(18,1))
+--	, [Res MB] = cast(ps.reserved_page_count / 128.0 as decimal(18,1))
+--	, [Used MB] = cast(ps.used_page_count / 128.0 as decimal(18,1))
 	, [RawCost] = cast(migs.avg_total_user_cost * migs.avg_user_impact * (migs.user_seeks + migs.user_scans) as Decimal(20, 0))
 	, [User Impact] = migs.avg_user_impact
 	, [Compiles] = migs.unique_compiles

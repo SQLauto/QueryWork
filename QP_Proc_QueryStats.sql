@@ -39,9 +39,9 @@ exec dbo.GetCustomFormatName
 */
 Use Master;
 Declare
-	@Database			Varchar(50) = 'ConSIRN'
+	@Database			Varchar(50) = 'ClvRawData'
 	, @Schema			Varchar(50) = 'dbo'
-	, @ProcName			Varchar(128) = 'Generate#ConsirnEodOvershort'
+	, @ProcName			Varchar(128) = 'GetRawPumpGrade'
 	, @Blank			NChar(1) = NChar(32)
 	, @CR				NChar(1) = NChar(13)
 	, @LF				NChar(1) = NChar(10)
@@ -118,8 +118,7 @@ Select
 							End
 	, [Max Rows]				= Cast(Null As BigInt)
 	, [Avg Rows]				= Cast(Null As BigInt)
-	, [Query Text]				= Cast(N'Database = ' + @Database + N'; Procedure Name = ' + @Schema + N'.' + @ProcName As NVarchar(256))
-								+ N'; Run Date = ' + @strNow
+	, [Query Text]				= Cast(N'Starting execution data for Procedure = ' + @Schema + N'.' + @ProcName As NVarchar(256))
     , [QryPlan]					= Coalesce(qp.query_plan, N'Not Available')
 
 	--, [Tot Worker Time (ms)]	= ps.total_worker_time / 1000

@@ -2,8 +2,8 @@
 	Ghost Record related queries
 	Main query is still WIP.
 	<RBH> 20170623
-	$Archive: $
-	$Revision: $	$Date: $
+	$Archive: /SQL/QueryWork/Idx_OperationalStats_GhostRecords.sql $
+	$Revision: 2 $	$Date: 9/12/17 11:35a $
 */
 
 /*

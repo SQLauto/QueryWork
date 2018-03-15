@@ -2,6 +2,8 @@
 	This Script returns all of the primary and secondary
 	data files for a server including the file size in GB
 	and the O/S Drive letter where the file is stored.
+
+	This script is used to capture the data for Server Inventory Spreadsheets.
 	
 	$Workfile: File_Get_MDF-NDF_Locations.sql $
 	$Archive: /SQL/QueryWork/File_Get_MDF-NDF_Locations.sql $
@@ -21,11 +23,11 @@ Select
 	, [Size (GB)] = Case When (mf.size / (128 * 1000) < 1) Then 1 Else (mf.size / (128 * 1000)) End
 	-- Keep the first 7 items in order to work with server inventory spreadsheets
 
-	, [Type] = mf.type_desc
-	, [Growth Type] = Case When mf.is_percent_growth = 1 Then 'Percent' Else 'Fixed' End
-	, [Growth (MB)] = mf.growth / 128
-	, [Max Size (MB)] = mf.max_size / 128
-	, [File State] = mf.state_desc
+	--, [Type] = mf.type_desc
+	--, [Growth Type] = Case When mf.is_percent_growth = 1 Then 'Percent' Else 'Fixed' End
+	--, [Growth (MB)] = mf.growth / 128
+	--, [Max Size (MB)] = mf.max_size / 128
+	--, [File State] = mf.state_desc
 	--, mf.*
 From
 	sys.databases as db

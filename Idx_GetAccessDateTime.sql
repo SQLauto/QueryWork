@@ -16,26 +16,30 @@
 
 	This will cause the 3 columns to be treated as 3 rows. I want to get the MAX value of these 3 columns so I need to alias the subquery to treat it as a table and provide a name for the column of 3 rows:
 
+	This script must be run in the target database.  The dmv sys.dm_db_index_usage_stats contains server level data and it is possible to
+	have the same object id in multiple databases.  Ask me how I know :).
 */
 --	Set Statistics IO On
 Select
-	[Schema] = Schema_Name(so.schema_id)
+	[Database] = Db_Name(ius.database_id)
+	, [Schema] = Schema_Name(so.schema_id)
 	, [Table Name] = so.name
-	, [Index] = si.name
+	, [Index] = Coalesce(si.name, 'Heap')
+	, [isClustered] = Case si.index_id When 1 Then 'Yes' Else 'No' End
 	, [Row Count] = sp.rows
-	, [Create Date] = so.create_date
+	--, [Create Date] = so.create_date
 	, [Modified Date] = so.modify_date
 	, [Last User Access] =
-		(Select Max(dt.LastUserAccess)	--Top 1 dso.LastUserRead
+		(Select Max(dt.LastUserAccess)
 		From (
 			Values (ius.last_user_scan), (ius.last_user_lookup), (ius.last_user_seek), (ius.last_user_update)
-			 ) As dt (LastUserAccess)-- Order By dso.LastUserRead Desc
+			 ) As dt (LastUserAccess)
 		)
 	, [Last System Access] =
-		(Select Max(dt.LastSystemAccess)	--Top 1 dso.LastUserRead
+		(Select Max(dt.LastSystemAccess)
 		From (
 			Values (ius.last_system_scan), (ius.last_system_lookup), (ius.last_system_seek), (ius.last_system_update)
-			 ) As dt (LastSystemAccess)-- Order By dso.LastUserRead Desc
+			 ) As dt (LastSystemAccess)
 		)
 From sys.objects As so
 	Inner Join sys.indexes As si
@@ -43,11 +47,12 @@ From sys.objects As so
 	Inner Join sys.partitions As sp
 		On so.object_id = sp.object_id
 		And si.index_id = sp.index_id
-	inner Join sys.dm_db_index_usage_stats ius
+	left Join sys.dm_db_index_usage_stats As ius
 		On ius.object_id = si.object_id
 		And ius.index_id = si.index_id
 Where 1 = 1
 	And so.type = 'U'
+	And ius.database_id = Db_Id()
 Order By so.name;
 Return;
 

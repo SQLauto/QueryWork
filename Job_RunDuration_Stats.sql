@@ -16,20 +16,20 @@ Use msdb;
 Set NoCount On;
 
 Declare
-	@DateEnd			DateTime = DateAdd(Day, DateDiff(Day, '2015-01-01', GetDate()), '2015-01-01')  -- Enddate is today
-	, @DateRange		Int = 1
+	@DateEnd			DateTime = DateAdd(Day, DateDiff(Day, '2015-01-01', GetDate()) + 1, '2015-01-01')  -- Default Enddate is today at 23:59
+	, @DateRange		Int = 2		-- default 2 gives all jobs from yesterday upto now
 	, @DateStart		DateTime
 	, @MSDBDateEnd		Int
 	, @MSDBDateStart	Int
 	, @JobName			NVarchar(128) = N''
-	, @StepStatus		Int = 1				-- 0 show all, 1 = show Not Succeeded Only
+	, @StepStatus		Int = 0				-- 0 show all, 1 = show Not Succeeded Only
 	, @Progress			Int = 0				-- 0 Filter out "InProgress", 1 = Include "InProgress"
 	;
 
 Set @DateStart = DateAdd(dd, -@DateRange, @DateEnd);
 Set @MSDBDateEnd = Cast(((DatePart(Year, @DateEnd) * 10000) + DatePart(Month, @DateEnd) * 100) + DATEPART(Day, @DateEnd) as int);
 Set @MSDBDateStart = @MSDBDateEnd - @DateRange;
-
+Select [DateStart] = @DateStart, [@DateEnd] = @DateEnd, [@DateRange] = @DateRange, [@MSDBDateStart] = @MSDBDateStart, [@MSDBDateEnd] = @MSDBDateEnd
 Select
 	[Job Name]		= j.name
 	, [Step Name]	= js.step_name
@@ -71,13 +71,13 @@ Where 1 = 1
 				Else 0							-- don't show step
 				End
 Order By
+--	[Duration sec]	Desc,
+--	[Run Time] Desc,
 	[Job Name]		--j.name
 	, [Run Time]
 	, [Step Id]		--jh.step_id
 --	, [Run Time Int]
---	, [Duration sec]	Desc
---	, [Run Time] Desc
-	--, jh.instance_id
+--	, jh.instance_id
 
 Return;
 

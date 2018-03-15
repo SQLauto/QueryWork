@@ -3,9 +3,11 @@
 	Exporting Execution Plans - SQL Spackle
 	http://www.sqlservercentral.com/articles/Execution+Plans/103484/
 
-	$Workfile: Query_Get_PlanFromCacheXMLCorrected.sql $
-	$Archive: /SQL/QueryWork/Query_Get_PlanFromCacheXMLCorrected.sql $
-	$Revision: 2 $	$Date: 14-03-11 9:43 $
+	$Workfile: Qry_Get_PlanFromCacheXMLCorrected.sql $
+	$Archive: /SQL/QueryWork/Qry_Get_PlanFromCacheXMLCorrected.sql $
+	$Revision: 3 $	$Date: 18-01-06 17:33 $
+
+	This seems pretty unwieldy for returning relatively little data.  Need to review the article <2018-01-05>
 	
 */
 
@@ -31,9 +33,7 @@ FROM sys.dm_exec_query_stats AS qs
 			REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
 			REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(
 			REPLACE(REPLACE(REPLACE(REPLACE(
-			CONVERT(
-					NVARCHAR(MAX),	N'--' + NCHAR(13) + NCHAR(10) + ist.text + NCHAR(13) + NCHAR(10) + N'--' COLLATE Latin1_General_Bin2
-						)
+			CONVERT(NVARCHAR(MAX),	N'--' + NCHAR(13) + NCHAR(10) + ist.text + NCHAR(13) + NCHAR(10) + N'--' COLLATE Latin1_General_Bin2)
 				, NCHAR(31),N'?'), NCHAR(30),N'?'), NCHAR(29),N'?'), NCHAR(28),N'?'), NCHAR(27),N'?')
 				, NCHAR(26),N'?'), NCHAR(25),N'?'), NCHAR(24),N'?'), NCHAR(23),N'?'), NCHAR(22),N'?')
 				, NCHAR(21),N'?'), NCHAR(20),N'?'), NCHAR(19),N'?'), NCHAR(18),N'?'), NCHAR(17),N'?')

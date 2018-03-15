@@ -17,7 +17,7 @@
 	$Revision: 5 $	$Date: 15-11-25 16:22 $
 */
 Declare
-	@SPId	Int = 88	-- 0		-- SPID to return data.  0 = all
+	@SPId	Int = 0	-- 0		-- SPID to return data.  0 = all
 	;
 SELECT
 	[SPID] = R.session_id

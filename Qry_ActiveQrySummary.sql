@@ -1,10 +1,9 @@
 /*
-	
 	See notes at end of script for how to determine the wait resource, Job Names, etc.
 
 	$Workfile: Qry_ActiveQrySummary.sql $
 	$Archive: /SQL/QueryWork/Qry_ActiveQrySummary.sql $
-	$Revision: 10 $	$Date: 17-03-20 14:27 $
+	$Revision: 15 $	$Date: 18-02-16 15:51 $
 */
 Use master;
 Set NoCount On;
@@ -12,16 +11,17 @@ Set Transaction Isolation Level Read Uncommitted;		-- sometimes the problem quer
 
 Select
 	[SPID] = ec.session_id
-	, [Blocker] = er.blocking_session_id
+	, [Blkr] = er.blocking_session_id
 	, [Database] = Db_Name(er.database_id)
-	, [Curr Wait(ms)] =  er.wait_time
-	, [Host] = es.host_name
-	, [Req Cmd] = er.command
-	, [Prog] = es.program_name
-	, [Proc Name] = Case When st.objectid Is Null Then 'n/a' Else Object_Name(st.objectid, st.dbid) End
+	, [Dur (ms)] =  er.wait_time
+	, [Elapsed (sec)] = Case When DateDiff(dd, er.start_time, GetDate()) > 7	-- Started more than 7 days ago
+								Then Cast(99999999999999.99 As Decimal(18, 2))		-- force over flow  :)
+								Else Cast((DateDiff(ss, er.start_time, GetDate())) As Decimal(18,2))
+								End
+	, [Req Status] = Coalesce(er.status, 'No Req Active')
 	, [Req Waiting For] = Case
 					When Substring(er.wait_resource, 1, CharIndex(':', er.wait_resource, 1) ) Between '000' And '999'
-						Then 'DB Page'
+						Then 'DB Page - ' + Replace(Cast(er.wait_resource as Varchar(24)), ':', ', ')
 					When er.wait_resource Like 'OBJECT:%' 
 						Then Object_Name(Cast(Substring(Substring(er.wait_resource, CharIndex(':', er.wait_resource, 8) + 1, Len(er.wait_resource)), 1 
 								, CharIndex(':', Substring(er.wait_resource, CharIndex(':', er.wait_resource, 8) + 1, Len(er.wait_resource)), 1) -1 )
@@ -46,27 +46,34 @@ Select
 							Else 'Unk - ' + er.wait_type End
 					Else er.wait_resource
 					End
-	, [Elapsed (sec)] = Case When DateDiff(dd, er.start_time, GetDate()) > 7	-- Started more than 7 days ago
-								Then Cast(99999999999999.99 As Decimal(18, 2))		-- force over flow  :)
-								Else Cast((DateDiff(ss, er.start_time, GetDate())) As Decimal(18,2))
-								End	
-	, [% Cmp]	= Cast(er.percent_complete As Decimal(12,3))
-	, [Req Status] = Coalesce(er.status, 'No Req Active')
-	, [Wait Resource] = er.wait_resource
-	, [Last Wait] = er.last_wait_type
+--	, [Wait Resource] = er.wait_resource
+	, [Prog] = Case When es.program_name like N'SQLAgent - TSQL%'
+					Then (Select N'SQLAgent Job - ' + sj.name + ' - ' + SubString(es.Program_Name, CharIndex(' : Step', es.Program_Name, 1) + 3, 6)
+						From msdb.dbo.sysjobs as sj
+						Where 1 = 1
+							And master.dbo.fn_varbintohexstr(convert(varbinary(16), job_id)) = SubString(es.Program_Name, CharIndex('(Job ', es.Program_Name, 1) + 5, 34)
+							-- And sj.job_id = SubString(es.Program_Name, CharIndex('(Job ', es.Program_Name, 1) + 5, 34)
+						)
+				Else es.program_name
+				End
+	, [Proc Name] = Case When st.objectid Is Null Then 'n/a' Else Object_Name(st.objectid, st.dbid) End
 	, [Wait Type]= Case
 					When er.wait_type Is Null And er.status = 'running' Then 'None'
 					When er.wait_type Is Null And er.status = 'runnable' Then 'Processor'
 					When er.wait_type Is Null Then 'null'
 					Else er.wait_type
 					End
-	, [CPU] = es.cpu_time
+	, [Host] = es.host_name
 	, [Sess Login] = es.login_name
 	, [Client PID] = es.host_process_id
+	, [CPU] = es.cpu_time
 	, [Phys Reads] = er.reads
 	, [Phys Writes] = er.writes
 	, [Logical Reads] = er.logical_reads
 	, [Worker Time] = er.cpu_time
+	, [Last Wait] = er.last_wait_type
+	, [Req Cmd] = er.command
+	, [% Cmp]	= Cast(er.percent_complete As Decimal(12,3))
 	, [Tot Time (Sec)] = Cast(er.total_elapsed_time * 1.0 / 1000.0 As Decimal(24, 3))
 	, [Last Req Time] = es.last_request_start_time
 	, [Last Req End] = es.last_request_end_time
@@ -98,7 +105,7 @@ Select
 	--, [Login Name] = es.nt_user_name
 	--, [Domain] = es.nt_domain
 	--, [Packet Size] = ec.net_packet_size
-	--, ec.local_net_address
+	--, [IP Address] = ec.local_net_address
 	--, [packet reads] = ec.num_reads
 	--, [packet writes] = ec.num_writes
 	--, [last packet read] = ec.last_read
@@ -127,9 +134,9 @@ Where 1 = 1
 				Else 1
 				End
 Order By
-	[Blocker]				Desc
+	[Blkr]				Desc
 	--, [Last Req End] 
-	, [Curr Wait(ms)]		Desc		-- er.wait_time
+	, [Dur (ms)]		Desc		-- er.wait_time
 	, [Req Status]			Desc		-- er.status				Desc
 	, [SPID]				Asc			-- er.session_id			Asc
 	--, [Req Wait Resource]				-- er.wait_resource
@@ -255,7 +262,7 @@ Which is the object id in the database
 
 */
 
---	Kill 74 with StatusOnly
+--	Kill 211 with StatusOnly
 
 --	DBCC InputBuffer (114)
 

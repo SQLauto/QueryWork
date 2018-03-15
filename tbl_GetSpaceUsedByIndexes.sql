@@ -3,12 +3,17 @@
 	all indexes of the specified table(s).
 	The table name can be a wild card
 	Also returns the physical Files and File Groups
-	Note: SQL DMVs already aggregae the counts and sizes when a FG has multiple files.
+	Note: SQL DMVs already aggregate the counts and sizes when a FG has multiple files.
 		Don't sum() them per file group.
+		- This returns a row per Allocation unit.  An index may and often does require multiple AU so
+			you will see multiple rows that are essential duplicates.
+			since this is just a diagnostic for personal use I left this unchanged in the interest of
+			capturing the FG and physcial file name.
 
 	$Archive: /SQL/QueryWork/tbl_GetSpaceUsedByIndexes.sql $
-	$Revision: 8 $	$Date: 16-04-16 10:47 $
+	$Revision: 10 $	$Date: 18-02-02 16:14 $
 */
+
 If Object_Id('tempdb.dbo.#theTables', 'U') Is Not Null
 	Drop Table #theTables
 Go
@@ -80,10 +85,9 @@ Select
 	tt.SchemaName
 	, tt.TableName
 	, [IndexName]		= coalesce(si.name, 'Heap')
-	
 	, [Drive]			= substring(ssf.filename, 1, 1)
 	, [Type]			= case si.index_id when 0 then 'Heap' when 1 then 'Clustered' else 'Index' end
-	, [Reserved(MB)]	 = CAST((ps.reserved_page_count) / 128.0 as DECIMAL(12,2))
+	, [Reserved(MB)]	= CAST((ps.reserved_page_count) / 128.0 as DECIMAL(12,2))
 	, [Used(MB)]		= CAST((ps.used_page_count) / 128.0 as DECIMAL(12,2))	-- 8192.0/ (1024.0 * 1024.0) = 1/128.0
 	, [Free(MB)]		= CAST(((ps.reserved_page_count) / 128.0) - ((ps.used_page_count) / 128.0) as DECIMAL(12,2))
 	, [Rows]			= (ps.row_count)
@@ -93,6 +97,7 @@ Select
 	, [LastModified]	= tt.modify_date
 	, ips.index_depth
 	, ips.index_level
+	, si.index_id
 From theTables as tt
 	inner join sys.dm_db_partition_stats as ps
 		on tt.object_id = ps.object_id

@@ -4,10 +4,11 @@
 	So far I have not found a way to determine the Rows/Space per file.  Only for FG aggregate
 		I assume there is something in the Allocation Unit - Sys.Patition relationship I am missing.
 	A new DMV added to SQL2012 may provide the data needed to resolve this issue :)
+	Currently commented out the file level code.
 
 	$Workfile: FG_GetObjectsIn.sql $
 	$Archive: /SQL/QueryWork/FG_GetObjectsIn.sql $
-	$Revision: 24 $	$Date: 17-03-20 14:26 $
+	$Revision: 25 $	$Date: 9/12/17 11:35a $
 	
 	Read Uncommitted added becuase frequently I run the script when something is "wrong"
 	and that means one or more of the dmvs may have a blocking lock :(
@@ -29,18 +30,18 @@ Select
 	, [Table] = so.name
 	, [Index] = coalesce(si.name, 'Heap')
 	, [Type] = Case si.index_id When 0 Then 'H' When 1 Then 'C' Else 'N' End
-	, [Drive] = Substring(ssf.filename, 1, 2)
 	, sp.rows
 	, [Total Space(MB)] = cast((au.total_pages * 8192.0) / (1024.0 * 1000.0) as DECIMAL(12, 2))
 	, [Used Space(MB)] = cast((au.used_pages * 8192.0) / (1024.0 * 1000.0) as DECIMAL(12, 2))
 	, [Data Space(MB)] = cast((au.data_pages * 8192.0) / (1024.0 * 1000.0) as DECIMAL(12, 2))
-	, [FileNameLogical] = ssf.name
-	, [FileNamePhysical] = ssf.filename
 	, au.total_pages
 	, so.object_id
 	, sp.index_id
 	, sp.partition_id
 	, au.allocation_unit_id
+	--, [Drive] = Substring(ssf.filename, 1, 2)
+	--, [FileNameLogical] = ssf.name
+	--, [FileNamePhysical] = ssf.filename
 	--, sp.hobt_id
 	--, ssf.*
 	--, sfg.*
@@ -48,8 +49,8 @@ Select
 	--, sp.*
 From
 	sys.sysfilegroups as sfg
-	inner join sys.sysfiles as ssf
-		on ssf.groupid = sfg.groupid
+	--inner join sys.sysfiles as ssf
+	--	on ssf.groupid = sfg.groupid
 	inner join sys.allocation_units as au
 		on au.data_space_id = sfg.groupid
 			and (au.type = 1 or au.type = 3)

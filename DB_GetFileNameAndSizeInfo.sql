@@ -3,7 +3,7 @@
 	files.
 	$Workfile: DB_GetFileNameAndSizeInfo.sql $
 	$Archive: /SQL/QueryWork/DB_GetFileNameAndSizeInfo.sql $
-	$Revision: 2 $	$Date: 14-03-11 9:43 $
+	$Revision: 3 $	$Date: 9/12/17 11:35a $
 
 */
 If Object_Id('tempdb..#FileData', 'U') Is Not Null

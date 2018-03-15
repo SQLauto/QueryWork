@@ -7,7 +7,7 @@
 		http://blogs.msdn.com/b/deepakbi/archive/2010/04/14/monitoring-tempdb-transactions-and-space-usage.aspx
 	Queries have been "Rayified" and extended.
 	$Archive: /SQL/QueryWork/TempDB_DetermineUsage.sql $
-	$Revision: 3 $	$Date: 14-06-30 11:01 $
+	$Revision: 4 $	$Date: 9/12/17 11:35a $
 	
 */
 -- check the current tempdb size
@@ -89,8 +89,7 @@ From
 	Inner Join sys.dm_exec_sessions As es
 		On ssu.session_id = es.session_id
 Where 1 = 1
-	--and es.is_user_process = 1
-	And es.session_id > 50	-- skip system sessions
+	and es.is_user_process = 1		-- skip system sessions
 ;
 Return;
 

@@ -4,7 +4,7 @@
 	
 	$Workfile: Idx_Get_UsageForTable.sql $
 	$Archive: /SQL/QueryWork/Idx_Get_UsageForTable.sql $
-	$Revision: 23 $	$Date: 17-02-10 10:04 $
+	$Revision: 24 $	$Date: 9/12/17 11:35a $
 
 */
 If Object_Id('tempdb.dbo.#theTables', 'U') Is Not Null
@@ -15,24 +15,22 @@ Set Transaction Isolation Level Read Uncommitted;
 
 Create Table #theTables(tId Integer);
 Declare
-	 @Schema			Varchar(50)		= 'dbo'	--
-	, @Table			Varchar(128)	= ''
-	, @Match			Varchar(50)		= 'Both'	-- Exact Table Name or Wild card on Both ends, Prefix end, Suffix end
+	 @Schema				VARCHAR(50)		= 'dbo'	--
+	, @Table				VARCHAR(128)	= ''
+	, @Match				VARCHAR(50)		= 'Both'	-- Exact Table Name or Wild card on Both ends, Prefix end, Suffix end
 	, @is_Include_sys		Integer = 0
 	, @is_Include_pViews	Integer = 1
 	, @is_Include_zDrop		Integer = 0
 	, @LookupCutOff			Integer = -1
 
-	, @DatabaseId		Integer
-	, @DatabaseName		Varchar(128)
-	, @RowCount			Integer
-	, @Now				DateTime		= GetDate()
-	, @SchemaId			Integer			= Null
-	, @TableId			Integer			= Null
+	, @DatabaseId			INTEGER = Db_Id()
+	, @DatabaseName			VARCHAR(128) = db_name()
+	, @RowCount				INTEGER
+	, @Now					DATETIME		= GetDate()
+	, @SchemaId				INTEGER			= Null
+	, @TableId				INTEGER			= Null
 	;
 
-Set @DatabaseName = db_name();
-Set @DatabaseId = Db_Id();
 Set @SchemaId = Coalesce(Schema_Id(@Schema), 'dbo');
 If @Match = 'Exact'
 Begin
@@ -71,45 +69,44 @@ Select
 	, [Table Name] = OBJECT_NAME(si.object_id)
 	, [Index Name] = coalesce(si.name, 'Heap')
 	, [Index Type] = SUBSTRING(coalesce(si.type_desc, 'X'), 1, 1)
-	, [User Seeks] = ius.user_seeks
-	--, [Last Seek Desc] = Case
-	--				When ius.last_user_seek is null then 'Never'
-	--				When datediff(dd, ius.last_user_seek, @Now) <= 1 Then 'Current'
-	--				When datediff(dd, ius.last_user_seek, @Now) <= 7 Then 'This Week'
-	--				When datediff(dd, ius.last_user_seek, @Now) <= 30 Then 'This Mnth'
-	--				When datediff(dd, ius.last_user_seek, @Now) <= 90 Then 'This Qtr'
-	--				Else 'very Old'
-	--				End
-	, [User Lookups] = ius.user_lookups
-	--, [Last Lookup Desc] = Case
-	--				When ius.last_user_lookup is null then 'Never'
-	--				When datediff(dd, ius.last_user_lookup, @Now) <= 1 Then 'Current'
-	--				When datediff(dd, ius.last_user_lookup, @Now) <= 7 Then 'This Week'
-	--				When datediff(dd, ius.last_user_lookup, @Now) <= 30 Then 'This Mnth'
-	--				When datediff(dd, ius.last_user_lookup, @Now) <= 90 Then 'This Qtr'
-	--				Else 'very Old'
-	--				End
-	, [User Scans] = ius.user_scans
-	--, [Last Scan Desc] = Case
-	--				When ius.last_user_scan is null then 'Never'
-	--				When datediff(dd, ius.last_user_scan, @Now) <= 1 Then 'Current'
-	--				When datediff(dd, ius.last_user_scan, @Now) <= 7 Then 'This Week'
-	--				When datediff(dd, ius.last_user_scan, @Now) <= 30 Then 'This Mnth'
-	--				When datediff(dd, ius.last_user_scan, @Now) <= 90 Then 'This Qtr'
-	--				Else 'very Old'
-	--				End
-	, [User Updates] = ius.user_updates
-	, [Last Lookup] = ius.last_user_lookup
-	, [Last Scan] = ius.last_user_scan
-	, [Last Seek] = ius.last_user_seek
-	, [Last Update] = ius.last_user_update
+	, [User Seeks] = Coalesce(ius.user_seeks, 0)
+	, [Last Seek Desc] = Case
+					When ius.last_user_seek is null then 'Never'
+					When datediff(dd, ius.last_user_seek, @Now) <= 1 Then 'Current'
+					When datediff(dd, ius.last_user_seek, @Now) <= 7 Then 'This Week'
+					When datediff(dd, ius.last_user_seek, @Now) <= 30 Then 'This Mnth'
+					When datediff(dd, ius.last_user_seek, @Now) <= 90 Then 'This Qtr'
+					Else 'very Old'
+					End
+	, [User Lookups] = Coalesce(ius.user_lookups, 0)
+	, [Last Lookup Desc] = Case
+					When ius.last_user_lookup is null then 'Never'
+					When datediff(dd, ius.last_user_lookup, @Now) <= 1 Then 'Current'
+					When datediff(dd, ius.last_user_lookup, @Now) <= 7 Then 'This Week'
+					When datediff(dd, ius.last_user_lookup, @Now) <= 30 Then 'This Mnth'
+					When datediff(dd, ius.last_user_lookup, @Now) <= 90 Then 'This Qtr'
+					Else 'very Old'
+					End
+	, [User Scans] = Coalesce(ius.user_scans, 0)
+	, [Last Scan Desc] = Case
+					When ius.last_user_scan is null then 'Never'
+					When datediff(dd, ius.last_user_scan, @Now) <= 1 Then 'Current'
+					When datediff(dd, ius.last_user_scan, @Now) <= 7 Then 'This Week'
+					When datediff(dd, ius.last_user_scan, @Now) <= 30 Then 'This Mnth'
+					When datediff(dd, ius.last_user_scan, @Now) <= 90 Then 'This Qtr'
+					Else 'very Old'
+					End
+	, [User Updates] = Coalesce(ius.user_updates, 0)
+	--, [Last Lookup] = ius.last_user_lookup
+	--, [Last Scan] = ius.last_user_scan
+	--, [Last Seek] = ius.last_user_seek
+	--, [Last Update] = ius.last_user_update
 	, [Res MB] = cast(ps.reserved_page_count / 128.0 as decimal(18,3))
 	--, [Used MB] = cast(ps.used_page_count / 128.0 as decimal(18,3))
-	, [NumRows] = ps.row_count
-	, [RunDate]	= @Now
+	, [Rows] = Coalesce(ps.row_count, 0)
+	, [Date]	= @Now
 	, [Server]	= @@ServerName
 	, [Database] = @DatabaseName
-	--, [Row Count] = ps.row_count
 	--, [Partition Id] = ps.partition_id
 	--, [Partition Num] = ps.partition_number
 	--, [Index Id]	= si.index_id

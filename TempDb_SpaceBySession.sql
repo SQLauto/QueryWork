@@ -11,8 +11,6 @@
 	
 	
 */
-
-
 ;
 WITH task_space_usage(session_id, requst_id, user_alloc_pages, user_dealloc_pages, sys_alloc_pages, sys_dealloc_pages)
 	AS (

@@ -12,3 +12,5 @@ I set these up under the GNU Public License 3.0 and have made a good faith effor
 the developers works that I copied/modified.  I don't really care what you do with this code as long as you don't blame me :)
 
 Use at your own risk :)
+
+A change to test github desktop
